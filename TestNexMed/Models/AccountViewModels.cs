@@ -65,6 +65,14 @@ namespace TestNexMed.Models
     public class RegisterViewModel
     {
         [Required]
+        [Display(Name = "Имя")]
+        public string UserName { get; set; }
+
+        [Required]
+        [Display(Name = "Ваш город")]
+        public string Sity { get; set; }
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Адрес электронной почты")]
         public string Email { get; set; }
@@ -109,4 +117,5 @@ namespace TestNexMed.Models
         [Display(Name = "Почта")]
         public string Email { get; set; }
     }
+
 }
