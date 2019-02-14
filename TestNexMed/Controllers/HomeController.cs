@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Web;
@@ -20,6 +21,9 @@ namespace TestNexMed.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private HttpClient client;
+        private HttpResponseMessage response;
+        private HttpContent content;
 
         public HomeController()
         {
@@ -29,6 +33,7 @@ namespace TestNexMed.Controllers
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            
         }
 
         public ApplicationSignInManager SignInManager
@@ -57,39 +62,50 @@ namespace TestNexMed.Controllers
 
         public async Task<ActionResult> Index()
         {
-            ViewBag.Message = "";
             var userId = User.Identity.GetUserId();
             var currentUser = await UserManager.FindByIdAsync(userId);
-
-            HttpClient client = new HttpClient();
-            HttpResponseMessage response = new HttpResponseMessage();
-
-            response = await client.GetAsync(
-                $"https://api.weatherbit.io/v2.0/current?city={currentUser.Sity}&key=58c2500edd1b4308aa4bf5063a7fcb03");
-            if (response.IsSuccessStatusCode)
-            {
-                HttpContent content = response.Content;
-                string result = await content.ReadAsStringAsync();
-                ModelWeather.RootObject dataRootObject = JToken.Parse(result).ToObject<ModelWeather.RootObject>(); //json2charp.com
-                ViewBag.Message =
-                    $"Температура твоего города({currentUser.Sity}) = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}";
-            }
-            else
-            {
-                
-            }
-
-            
-           
+            var dataRootObject = await GetDataApiServices(currentUser.Sity);
+            ViewBag.Message = dataRootObject != null ?
+                $"Температура в твоем городе({currentUser.Sity}) = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}" : "Нет связи с погодным сервером!";
 
             return View();
         }
 
-        public ActionResult About()
+        [HttpPost]
+        public async Task<ActionResult> Temperature(ModelSityWeather model)
+        {
+            var dataRootObject = await GetDataApiServices(model.SityName);
+            var temp = dataRootObject!=null?
+                $"Температура в {model.SityName} = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}":"Нет связи с погодным сервером!";
+
+            return RedirectToAction("About", "Home",new {temp});
+        }
+
+        public async Task<ModelWeather.RootObject> GetDataApiServices(string sity)
+        {
+            client = new HttpClient();
+            ModelWeather.RootObject dataRootObject = null;
+            try
+            {
+                response = await client.GetAsync(
+                    $"https://api.weatherbit.io/v2.0/current?city={sity}&key=58c2500edd1b4308aa4bf5063a7fcb03");
+                content = response.Content;
+                string result = await content.ReadAsStringAsync();
+                dataRootObject = JToken.Parse(result).ToObject<ModelWeather.RootObject>(); //json2charp.com
+                
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
+            return dataRootObject;
+        }
+
+        public ActionResult About(string temp)
         {
             ViewBag.Message = "на "+DateTime.Now.Date.ToShortDateString();
-            //Task t = new Task(RequestWether);
-            //t.Start();
+            ViewBag.Temperature = temp;
             return View();
         }
 
