@@ -24,6 +24,7 @@ namespace TestNexMed.Controllers
         private HttpClient client;
         private HttpResponseMessage response;
         private HttpContent content;
+        private string error = "";
 
         public HomeController()
         {
@@ -84,11 +85,22 @@ namespace TestNexMed.Controllers
         public async Task<ActionResult> Temperature(ModelSityWeather model)
         {
             var dataRootObject = await GetDataApiServices(model.SityName);
-            var temp = dataRootObject != null ?
-                $"Температура в городе {model.SityName} = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}" : "Нет связи с погодным сервером!";
+            string temp = "";
+            if(dataRootObject!=null)
+            {
+                temp = $"Температура в городе {model.SityName} = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}"; 
 
-            ModelWeather.SeviceData seviceData = new ModelWeather.SeviceData { NameSity = model.SityName, NameService = "weatherbit", Temperature = dataRootObject.data.First().temp, DateWeather = DateTime.Now };
-            await SaveWeather(seviceData);
+                ModelWeather.SeviceData seviceData = new ModelWeather.SeviceData { NameSity = model.SityName, NameService = "weatherbit", Temperature = dataRootObject.data.First().temp, DateWeather = DateTime.Now };
+                await SaveWeather(seviceData);
+            }
+            else if(string.IsNullOrEmpty(error))
+            {
+                temp = "Нет связи с погодным сервером!";
+            }
+            else
+            {
+                temp = error;
+            }
 
             return RedirectToAction("About", "Home", new { temp });
         }
@@ -99,10 +111,13 @@ namespace TestNexMed.Controllers
         /// <param name="seviceData"></param>
         private async Task SaveWeather(ModelWeather.SeviceData seviceData)
         {
-            using (WeatherContext weatherContext = new WeatherContext())
+            if(seviceData!=null)
             {
-                weatherContext.SeviceDatas.Add(seviceData);
-                await weatherContext.SaveChangesAsync();
+                using (WeatherContext weatherContext = new WeatherContext())
+                {
+                    weatherContext.SeviceDatas.Add(seviceData);
+                    await weatherContext.SaveChangesAsync();
+                }
             }
         }
 
@@ -121,10 +136,17 @@ namespace TestNexMed.Controllers
                     $"https://api.weatherbit.io/v2.0/current?city={sity}&key=58c2500edd1b4308aa4bf5063a7fcb03");
                 content = response.Content;
                 string result = await content.ReadAsStringAsync();
-                dataRootObject = JToken.Parse(result).ToObject<ModelWeather.RootObject>(); //json2charp.com
-
+                error = "";
+                if (string.IsNullOrEmpty(result))
+                {
+                    error = "По этому городу нет данных!";
+                }
+                else
+                {
+                    dataRootObject = JToken.Parse(result).ToObject<ModelWeather.RootObject>(); //json2charp.com
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // ignored
             }
