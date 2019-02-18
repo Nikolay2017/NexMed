@@ -33,7 +33,7 @@ namespace TestNexMed.Controllers
         {
             UserManager = userManager;
             SignInManager = signInManager;
-            
+
         }
 
         public ApplicationSignInManager SignInManager
@@ -60,6 +60,10 @@ namespace TestNexMed.Controllers
             }
         }
 
+        /// <summary>
+        /// Страница "главная"
+        /// </summary>
+        /// <returns></returns>
         public async Task<ActionResult> Index()
         {
             var userId = User.Identity.GetUserId();
@@ -71,16 +75,42 @@ namespace TestNexMed.Controllers
             return View();
         }
 
+        /// <summary>
+        /// Получение погодных данных с погодного сервера по названию города
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult> Temperature(ModelSityWeather model)
         {
             var dataRootObject = await GetDataApiServices(model.SityName);
-            var temp = dataRootObject!=null?
-                $"Температура в {model.SityName} = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}":"Нет связи с погодным сервером!";
+            var temp = dataRootObject != null ?
+                $"Температура в городе {model.SityName} = {dataRootObject.data.First().temp.ToString(CultureInfo.InvariantCulture)}" : "Нет связи с погодным сервером!";
 
-            return RedirectToAction("About", "Home",new {temp});
+            ModelWeather.SeviceData seviceData = new ModelWeather.SeviceData { NameSity = model.SityName, NameService = "weatherbit", Temperature = dataRootObject.data.First().temp, DateWeather = DateTime.Now };
+            await SaveWeather(seviceData);
+
+            return RedirectToAction("About", "Home", new { temp });
         }
 
+        /// <summary>
+        /// Добавление полученных данных с погодного сервера в базу 
+        /// </summary>
+        /// <param name="seviceData"></param>
+        private async Task SaveWeather(ModelWeather.SeviceData seviceData)
+        {
+            using (WeatherContext weatherContext = new WeatherContext())
+            {
+                weatherContext.SeviceDatas.Add(seviceData);
+                await weatherContext.SaveChangesAsync();
+            }
+        }
+
+        /// <summary>
+        /// Вытягивания данных о погоде с сервера
+        /// </summary>
+        /// <param name="sity"></param>
+        /// <returns></returns>
         public async Task<ModelWeather.RootObject> GetDataApiServices(string sity)
         {
             client = new HttpClient();
@@ -92,7 +122,7 @@ namespace TestNexMed.Controllers
                 content = response.Content;
                 string result = await content.ReadAsStringAsync();
                 dataRootObject = JToken.Parse(result).ToObject<ModelWeather.RootObject>(); //json2charp.com
-                
+
             }
             catch (Exception)
             {
@@ -102,18 +132,27 @@ namespace TestNexMed.Controllers
             return dataRootObject;
         }
 
+        /// <summary>
+        /// Страница "о погоде"
+        /// </summary>
+        /// <param name="temp"></param>
+        /// <returns></returns>
         public ActionResult About(string temp)
         {
-            ViewBag.Message = "на "+DateTime.Now.Date.ToShortDateString();
+            ViewBag.Message = "на " + DateTime.Now.Date.ToShortDateString();
             ViewBag.Temperature = temp;
             return View();
         }
 
+        /// <summary>
+        /// Страница архив
+        /// </summary>
+        /// <returns></returns>
         public ActionResult Arxive()
         {
             ViewBag.Message = "-----------------------";
             return View();
         }
-    }
 
+    }
 }

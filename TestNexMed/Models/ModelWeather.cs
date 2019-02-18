@@ -58,5 +58,14 @@ namespace TestNexMed.Models
             public List<Datum> data { get; set; }
             public int count { get; set; }
         }
+
+        public class SeviceData
+        {
+            public int Id { get; set; }
+            public string NameService { get; set; }
+            public string NameSity { get; set; }
+            public double Temperature { get; set; }
+            public DateTime DateWeather { get; set; }
+        }
     }
 }
