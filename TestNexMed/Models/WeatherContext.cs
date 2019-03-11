@@ -6,10 +6,10 @@ using System.Web;
 
 namespace TestNexMed.Models
 {
-    public class WeatherContext : DbContext
+    public class WeatherContext //: DbContext
     {
-        public WeatherContext() : base("DefaultConnection")
-        { }
-        public DbSet<ModelWeather.SeviceData> SeviceDatas { get; set; }
+        //public WeatherContext() : base("DefaultConnection")
+        //{ }
+        
     }
 }

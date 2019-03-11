@@ -21,6 +21,7 @@ namespace TestNexMed.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private ApplicationDbContext _dbContext;
         private HttpClient client;
         private HttpResponseMessage response;
         private HttpContent content;
@@ -30,11 +31,23 @@ namespace TestNexMed.Controllers
         {
         }
 
-        public HomeController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
+        public HomeController(ApplicationUserManager userManager, ApplicationSignInManager signInManager, ApplicationDbContext dbContext)
         {
             UserManager = userManager;
             SignInManager = signInManager;
+            DbContext = dbContext;
+        }
 
+        public ApplicationDbContext DbContext
+        {
+            get
+            {
+                return _dbContext ?? HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            }
+            private set
+            {
+                _dbContext = value;
+            }
         }
 
         public ApplicationSignInManager SignInManager
@@ -111,13 +124,10 @@ namespace TestNexMed.Controllers
         /// <param name="seviceData"></param>
         private async Task SaveWeather(ModelWeather.SeviceData seviceData)
         {
-            if(seviceData!=null)
+            if (seviceData != null)
             {
-                using (WeatherContext weatherContext = new WeatherContext())
-                {
-                    weatherContext.SeviceDatas.Add(seviceData);
-                    await weatherContext.SaveChangesAsync();
-                }
+                DbContext.SeviceDatas.Add(seviceData);
+                await DbContext.SaveChangesAsync();
             }
         }
 

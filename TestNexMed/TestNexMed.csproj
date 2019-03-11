@@ -188,6 +188,10 @@
     <Compile Include="Migrations\201902121040196_MigrateDB1.Designer.cs">
       <DependentUpon>201902121040196_MigrateDB1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201903110510213_AddContextMigration.cs" />
+    <Compile Include="Migrations\201903110510213_AddContextMigration.Designer.cs">
+      <DependentUpon>201903110510213_AddContextMigration.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -277,6 +281,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201902121040196_MigrateDB1.resx">
       <DependentUpon>201902121040196_MigrateDB1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201903110510213_AddContextMigration.resx">
+      <DependentUpon>201903110510213_AddContextMigration.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -22,6 +22,8 @@ namespace TestNexMed.Models
 
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public DbSet<ModelWeather.SeviceData> SeviceDatas { get; set; }
+
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {
