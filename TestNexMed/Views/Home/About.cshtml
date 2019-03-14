@@ -13,14 +13,14 @@
             {
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                 <div class="form-group">
-                    @Html.LabelFor(m => m.SityName, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
+                    @Html.LabelFor(m => m.SityName, new { @class = "col-md-4 control-label" })
+                    <div class="col-md-4">
                         @Html.TextBoxFor(m => m.SityName, new { @class = "form-control" })
                         @Html.ValidationMessageFor(m => m.SityName, "", new { @class = "text-danger" })
                     </div>
                 </div>
                 <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
+                    <div class="col-md-offset-2 col-md-8">
                         <input type="submit" value="Узнать погоду(запись данных в базу)" class="btn btn-default" />
                     </div>
                 </div>

@@ -182,11 +182,14 @@ namespace TestNexMed.Controllers
         /// Страница архив
         /// </summary>
         /// <returns></returns>
-        public ActionResult Arxive(int? page)
+        public ActionResult Arxive(int? page, DateTime? date)
         {
             int pageSize = 3;
             int pageNumber = (page ?? 1);
-            return View(DbContext.SeviceDatas.ToList().ToPagedList(pageNumber, pageSize));
+            if (date == null) return View(DbContext.SeviceDatas.ToList().ToPagedList(pageNumber, pageSize));
+            ViewBag.Date = date.Value.Date.ToString("yyyy-MM-dd");
+            return View(DbContext.SeviceDatas.ToList().Where(o=>o.DateWeather.Date == date.Value.Date).ToList().ToPagedList(pageNumber, pageSize));
+
         }
 
     }
