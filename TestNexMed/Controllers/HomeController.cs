@@ -4,6 +4,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
@@ -128,8 +129,52 @@ namespace TestNexMed.Controllers
         {
             if (seviceData != null)
             {
+                var temperatura = DbContext.SeviceDatas.ToList().LastOrDefault(o => o.NameSity == seviceData.NameSity)?.Temperature;
+                if (temperatura != null && seviceData.Temperature != temperatura)
+                {
+                    var polzs = DbContext.Users.Where(o => o.Sity == seviceData.NameSity).ToList();
+                    foreach (var applicationUser in polzs)
+                    {
+                        await EmailSend(applicationUser, seviceData.Temperature);
+                    }
+                }
                 DbContext.SeviceDatas.Add(seviceData);
                 await DbContext.SaveChangesAsync();
+
+                
+            }
+        }
+
+        /// <summary>
+        /// Отправка сообщения пользователям об измененной температуре в их городе
+        /// </summary>
+        /// <param name="applicationUser"></param>
+        /// <param name="temp"></param>
+        /// <returns></returns>
+        private async Task EmailSend(ApplicationUser applicationUser,double temp)
+        {
+            // наш email с заголовком письма
+            MailAddress from = new MailAddress("pisarev2@rambler.ru", "Погода");
+            // кому отправляем
+            MailAddress to = new MailAddress(applicationUser.Email);
+            // создаем объект сообщения
+            MailMessage m = new MailMessage(from, to);
+            // тема письма
+            m.Subject = "Погода";
+            // текст письма - включаем в него ссылку
+            m.Body = "Температура в городе изменилась на "+ temp;
+            m.IsBodyHtml = true;
+            // адрес smtp-сервера, с которого мы и будем отправлять письмо
+            SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.rambler.ru", 25);
+            // логин и пароль
+            smtp.Credentials = new System.Net.NetworkCredential("pisarev2@rambler.ru", "19842106");
+            try
+            {
+                await smtp.SendMailAsync(m);
+            }
+            catch (Exception e)
+            {
+                
             }
         }
 
@@ -189,8 +234,6 @@ namespace TestNexMed.Controllers
             if (date == null) return View(DbContext.SeviceDatas.ToList().ToPagedList(pageNumber, pageSize));
             ViewBag.Date = date.Value.Date.ToString("yyyy-MM-dd");
             return View(DbContext.SeviceDatas.ToList().Where(o=>o.DateWeather.Date == date.Value.Date).ToList().ToPagedList(pageNumber, pageSize));
-
         }
-
     }
 }
