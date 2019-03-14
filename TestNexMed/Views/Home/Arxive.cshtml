@@ -1,7 +1,39 @@
-﻿@{
+﻿@model PagedList.IPagedList<TestNexMed.Models.ModelWeather.SeviceData>
+@using PagedList.Mvc;
+@{
     ViewBag.Title = "Архив данных";
 }
 <h2>@ViewBag.Title</h2>
-<h3>@ViewBag.Message!</h3>
+<table class="table">
+    <tr>
+        <th>Сервис</th>
+        <th>Город</th>
+        <th>Температура</th>
+        <th>Дата</th>
+    </tr>
+ 
+    @foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.NameService)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.NameSity)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Temperature)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DateWeather)
+        </td>
+    </tr>
+    }
+ 
+</table>
+<br />
+Страница @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) из @Model.PageCount
+ 
+@Html.PagedListPager(Model, page => Url.Action("Arxive",  new { page }))
+
 
 

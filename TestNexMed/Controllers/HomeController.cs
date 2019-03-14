@@ -13,6 +13,8 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Newtonsoft.Json.Linq;
 using TestNexMed.Models;
+using PagedList.Mvc;
+using PagedList;
 
 namespace TestNexMed.Controllers
 {
@@ -180,10 +182,11 @@ namespace TestNexMed.Controllers
         /// Страница архив
         /// </summary>
         /// <returns></returns>
-        public ActionResult Arxive()
+        public ActionResult Arxive(int? page)
         {
-            ViewBag.Message = "-----------------------";
-            return View();
+            int pageSize = 3;
+            int pageNumber = (page ?? 1);
+            return View(DbContext.SeviceDatas.ToList().ToPagedList(pageNumber, pageSize));
         }
 
     }
