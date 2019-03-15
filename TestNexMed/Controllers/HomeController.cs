@@ -167,7 +167,7 @@ namespace TestNexMed.Controllers
             // адрес smtp-сервера, с которого мы и будем отправлять письмо
             SmtpClient smtp = new System.Net.Mail.SmtpClient("smtp.rambler.ru", 25);
             // логин и пароль
-            smtp.Credentials = new System.Net.NetworkCredential("pisarev2@rambler.ru", "19842106");
+            smtp.Credentials = new System.Net.NetworkCredential("pisarev2@rambler.ru", "*********");
             try
             {
                 await smtp.SendMailAsync(m);
